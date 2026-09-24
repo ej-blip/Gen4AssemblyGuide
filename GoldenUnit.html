@@ -1292,7 +1292,7 @@
         </div>
 
         <div class="stage-status" role="status" aria-live="polite">
-          <span class="build-tag" id="buildTag">build 13</span>
+          <span class="build-tag" id="buildTag">build 14</span>
           <span class="build-tag" id="editedTag" hidden>edited on this device</span>
                     <span id="stageStatusText">Select a component</span>
         </div>
@@ -1354,9 +1354,9 @@
             <p class="source-note" id="sourceNote"></p>
 
             <div class="edit-tools" id="editTools" hidden>
-              <p class="edit-hint">Editing is on. Tap any text to change it. Changes are saved on this device.</p>
+              <p class="edit-hint">Editing is on. Tap any text to change it. Changes are saved on this device only; to have them built into the app, tap Export my edits and send the file in.</p>
               <div class="edit-tools-buttons">
-                <button type="button" id="exportContent">Save a copy of all text</button>
+                <button type="button" id="exportContent">Export my edits</button>
                 <button type="button" id="resetContent">Undo my changes</button>
               </div>
             </div>
@@ -1788,6 +1788,9 @@
     // ---------- editing (locked behind the admin passcode) ----------
     const ADMIN_PASSCODE = "2301";
     const EDIT_STORAGE_KEY = "gen4-assembly-edits-v1";
+    const EDITABLE_FIELDS = ["name", "description", "appliesTo", "torque", "torqueNote", "steps", "reminders", "postOperation", "checkLabel"];
+    // The wording built into this file, kept so edits made on this device can be told apart from it.
+    const BUILT_IN_TEXT = JSON.parse(JSON.stringify(WORK_INSTRUCTION.sharedInformation));
     let editMode = false;
 
     function loadSavedEdits() {
@@ -1808,28 +1811,41 @@
       });
     }
 
+    // Every piece of text on this device that differs from the wording built into this file.
+    function listEdits() {
+      const edits = [];
+      Object.entries(WORK_INSTRUCTION.sharedInformation).forEach(([key, information]) => {
+        EDITABLE_FIELDS.forEach((field) => {
+          const builtIn = BUILT_IN_TEXT[key][field];
+          // An emptied note is the same as no note, so "" and null count as equal.
+          if (JSON.stringify(information[field] || "") !== JSON.stringify(builtIn || "")) {
+            edits.push({ component: BUILT_IN_TEXT[key].name, key, field, builtIn, edited: information[field] });
+          }
+        });
+      });
+      return edits;
+    }
+
+    // Only the text that was actually changed is kept, so a newer version of the file
+    // still shows its own wording everywhere else.
     function saveEdits() {
       const payload = {};
-      Object.entries(WORK_INSTRUCTION.sharedInformation).forEach(([key, information]) => {
-        payload[key] = {
-          name: information.name,
-          description: information.description,
-          appliesTo: information.appliesTo,
-          torque: information.torque,
-          torqueNote: information.torqueNote,
-          steps: information.steps,
-          reminders: information.reminders,
-          postOperation: information.postOperation,
-          checkLabel: information.checkLabel
-        };
+      listEdits().forEach(({ key, field, edited }) => {
+        payload[key] = payload[key] || {};
+        payload[key][field] = edited;
       });
       try {
-        window.localStorage.setItem(EDIT_STORAGE_KEY, JSON.stringify(payload));
+        if (Object.keys(payload).length > 0) {
+          window.localStorage.setItem(EDIT_STORAGE_KEY, JSON.stringify(payload));
+        } else {
+          window.localStorage.removeItem(EDIT_STORAGE_KEY);
+        }
       } catch (error) {
         const banner = document.getElementById("errorBanner");
         banner.textContent = "This browser would not save the change. It will be lost when the page is closed.";
         banner.classList.add("is-visible");
       }
+      refreshEditStatus();
     }
 
     // Makes one piece of text on screen editable and writes it back where it came from.
@@ -1844,7 +1860,9 @@
       if (!element.textContent.trim() && placeholder) {
         element.textContent = placeholder;
       }
-      element.addEventListener("blur", () => {
+      // Assigned, not added: the panel's title and description boxes are reused for every
+      // component, so only the component on screen now may receive the text.
+      element.onblur = () => {
         let text = element.textContent.replace(/\s+/g, " ").trim();
         if (text === placeholder) {
           text = "";
@@ -1852,13 +1870,13 @@
         write(text);
         saveEdits();
         renderSharedInformation(WORK_INSTRUCTION.sharedInformation[currentInfoKey]);
-      });
-      element.addEventListener("keydown", (event) => {
+      };
+      element.onkeydown = (event) => {
         if (event.key === "Enter") {
           event.preventDefault();
           element.blur();
         }
-      });
+      };
     }
 
     function makeRemoveButton(onRemove) {
@@ -2402,22 +2420,55 @@
       }
     });
 
-    // Hands back a file holding every word and number currently on screen,
-    // so the edits can be kept, shared or built into the next version.
-    document.querySelector("#exportContent").addEventListener("click", () => {
-      const payload = {
-        contentVersion: new Date().toISOString().slice(0, 10),
-        sharedInformation: WORK_INSTRUCTION.sharedInformation
-      };
+    const exportButton = document.querySelector("#exportContent");
+
+    // Shows whether this device has edits, and how many are waiting to be exported.
+    function refreshEditStatus() {
+      const count = listEdits().length;
+      document.querySelector("#editedTag").hidden = count === 0;
+      exportButton.textContent = count > 0 ? `Export my edits (${count})` : "Export my edits";
+    }
+
+    function downloadFile(file) {
       const link = document.createElement("a");
-      link.href = URL.createObjectURL(new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" }));
-      link.download = `gen4-text-${payload.contentVersion}.json`;
+      link.href = URL.createObjectURL(file);
+      link.download = file.name;
       link.click();
       setTimeout(() => URL.revokeObjectURL(link.href), 5000);
+    }
+
+    // Hands back a file listing every edit made on this device beside the built-in wording,
+    // to be sent in and built into the next version of the app.
+    exportButton.addEventListener("click", () => {
+      const edits = listEdits();
+      if (edits.length === 0) {
+        window.alert("There are no edits on this device to export.");
+        return;
+      }
+      const now = new Date();
+      const localTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString();
+      const payload = {
+        note: "Text edits made on one device, to be built into the Gen4 assembly guide.",
+        build: document.querySelector("#buildTag").textContent,
+        exported: now.toString(),
+        edits
+      };
+      const fileName = `gen4-edits-${localTime.slice(0, 10)}-${localTime.slice(11, 16).replace(":", "")}.txt`;
+      const file = new File([JSON.stringify(payload, null, 2)], fileName, { type: "text/plain" });
+      // On an iPad this opens the share sheet (Save to Files, AirDrop, Mail); elsewhere it downloads.
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        navigator.share({ files: [file] }).catch((error) => {
+          if (error.name !== "AbortError") {
+            downloadFile(file);
+          }
+        });
+      } else {
+        downloadFile(file);
+      }
     });
 
     document.querySelector("#resetContent").addEventListener("click", () => {
-      if (!window.confirm("Undo every change made on this device and go back to the built-in wording?")) {
+      if (!window.confirm("Undo every change made on this device and go back to the built-in wording? Export your edits first if they still need to be built into the app.")) {
         return;
       }
       try {
@@ -2429,11 +2480,7 @@
     });
 
     loadSavedEdits();
-    try {
-      document.querySelector("#editedTag").hidden = !window.localStorage.getItem(EDIT_STORAGE_KEY);
-    } catch (error) {
-      // storage unavailable; nothing to flag
-    }
+    refreshEditStatus();
 
     // ---------- global interactions ----------
     // Clicking anywhere on the photo that is not a component resets to the clean image.
