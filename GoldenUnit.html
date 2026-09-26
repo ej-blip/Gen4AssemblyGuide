@@ -347,12 +347,16 @@
       font-size: 13px;
     }
 
+    /* Edit mode menu: opens under the Edit mode button while editing is on. */
     .edit-tools {
-      margin-top: 4px;
+      position: fixed;
+      z-index: 40;
+      width: min(340px, calc(100vw - 16px));
       padding: 12px;
-      border: 1px solid rgba(255, 212, 0, 0.4);
+      border: 1px solid rgba(255, 212, 0, 0.55);
       border-radius: 10px;
-      background: rgba(255, 212, 0, 0.06);
+      background: var(--surface);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
     }
 
     .edit-hint {
@@ -1251,6 +1255,14 @@
     </div>
   </div>
 
+  <div class="edit-tools" id="editTools" role="dialog" aria-label="Edit mode" hidden>
+    <p class="edit-hint">Editing is on. Tap any text in a component's details to change it. Changes are saved on this device only; to have them built into the app, tap Export my edits and send the file in.</p>
+    <div class="edit-tools-buttons">
+      <button type="button" id="exportContent">Export my edits</button>
+      <button type="button" id="resetContent">Undo my changes</button>
+    </div>
+  </div>
+
   <main class="app-shell">
     <header class="topbar">
       <div class="brand">
@@ -1266,7 +1278,7 @@
         <button type="button" role="tab" class="view-tab" data-view="bracket" aria-selected="false">Bracket View</button>
       </div>
 
-      <button type="button" class="edit-lock" id="editLock" aria-pressed="false">Edit mode</button>
+      <button type="button" class="edit-lock" id="editLock" aria-pressed="false" aria-haspopup="true" aria-expanded="false" aria-controls="editTools">Edit mode</button>
       <div class="metadata" aria-label="Work instruction metadata">
         <div class="meta-item">
           <span class="meta-label">Unit</span>
@@ -1325,7 +1337,7 @@
         </div>
 
         <div class="stage-status" role="status" aria-live="polite">
-          <span class="build-tag" id="buildTag">build 17</span>
+          <span class="build-tag" id="buildTag">build 18</span>
           <span class="build-tag" id="editedTag" hidden>edited on this device</span>
                     <span id="stageStatusText">Select a component</span>
         </div>
@@ -1385,14 +1397,6 @@
             </section>
 
             <p class="source-note" id="sourceNote"></p>
-
-            <div class="edit-tools" id="editTools" hidden>
-              <p class="edit-hint">Editing is on. Tap any text to change it. Changes are saved on this device only; to have them built into the app, tap Export my edits and send the file in.</p>
-              <div class="edit-tools-buttons">
-                <button type="button" id="exportContent">Export my edits</button>
-                <button type="button" id="resetContent">Undo my changes</button>
-              </div>
-            </div>
 
             <div class="edit-actions" id="editActions" hidden>
               <button type="button" class="edit-button" id="editComponent">Edit this component</button>
@@ -1515,13 +1519,13 @@
           { id: "sma-position-3", step: 5, name: "SMA/C3", infoId: "smaConnector", tightHitArea: true, rects: [[827, 354, 47, 33]] },
           { id: "sma-position-2", step: 6, name: "SMA/B2", infoId: "smaConnector", tightHitArea: true, rects: [[827, 294, 47, 33]] },
           { id: "sma-position-1", step: 7, name: "SMA/A1", infoId: "smaConnector", tightHitArea: true, rects: [[827, 234, 48, 34]] },
-          { id: "sma-gps-top", step: 11, name: "GPS antenna SMA", infoId: "gpsAntennaConnector", rects: [[614, 906, 37, 56]] },
-          { id: "sma-rf-top", step: 12, name: "RF SMA", infoId: "rfAntennaSma", rects: [[223, 905, 40, 51]] },
+          { id: "sma-gps-top", step: 11, name: "GPS antenna connector", infoId: "gpsAntennaConnector", rects: [[614, 906, 37, 56]] },
+          { id: "sma-rf-top", step: 12, name: "RF antenna SMA connector", infoId: "rfAntennaSma", rects: [[223, 905, 40, 51]] },
           { id: "bulgin-to-mcb", step: 14, name: "Bulgin To MCB", infoId: "bulginToMcb", tightHitArea: true, rects: [[996, 815, 128, 424]] },
-          { id: "knurled-nut", step: 17, name: "Knurled bolt", infoId: "knurledNut", circle: [702, 331, 26] },
+          { id: "knurled-nut", step: 17, name: "Knurled Nut", infoId: "knurledNut", circle: [702, 331, 26] },
           { id: "sma-position-4", name: "RF CAP", infoId: "goldCap", tightHitArea: true, rects: [[827, 405, 47, 40]] },
           { id: "mcb-top", name: "MCB", infoId: "mcb", tightHitArea: true, rects: [[995, 620, 144, 184]] },
-          { id: "gland-top", name: "Small cable gland", infoId: "cableGland", tightHitArea: true, rects: [[966, 1244, 180, 92]] },
+          { id: "gland-top", name: "Cable gland", infoId: "cableGland", tightHitArea: true, rects: [[966, 1244, 180, 92]] },
           { id: "earth-stud-upper", name: "Earth stud", infoId: "earthStud", circle: [1491, 129, 31] },
           { id: "earth-stud-lower", name: "Earth stud", infoId: "earthStud", circle: [1490, 1200, 29] }
           ]
@@ -1535,10 +1539,10 @@
           { id: "bncb-front-3", step: 6, name: "BNCB connector", infoId: "bncbConnector", rects: [[764, 1090, 134, 149]] },
           { id: "bncb-front-4", step: 7, name: "BNCB connector", infoId: "bncbConnector", rects: [[993, 1090, 123, 149]] },
           { id: "mf4-cable", step: 9, name: "MF4-to-MF4 power cable", infoId: "mf4Cable", rects: [[932, 463, 59, 76], [350, 658, 66, 85]] },
-          { id: "mf8-cable", step: 10, name: "MF8-to-MF8 LF cable", infoId: "mf8Cable", rects: [[714, 462, 102, 78], [489, 658, 105, 84]] },
-          { id: "bulgin-power-front", step: 13, name: "2-pin Bulgin connector", infoId: "bulginPower", tightHitArea: true, rects: [[1372, 1186, 218, 61]] },
-          { id: "gland-front", step: 15, name: "Small cable gland", infoId: "cableGland", tightHitArea: true, circle: [1537, 1052, 127] },
-          { id: "psu-earth-cable", step: 16, name: "2-pin earth cable", infoId: "psuEarthCable", rects: [[647, 658, 41, 84]] }
+          { id: "mf8-cable", step: 10, name: "MF8 cable", infoId: "mf8Cable", rects: [[714, 462, 102, 78], [489, 658, 105, 84]] },
+          { id: "bulgin-power-front", step: 13, name: "Bulgin 2-pin power connector", infoId: "bulginPower", tightHitArea: true, rects: [[1372, 1186, 218, 61]] },
+          { id: "gland-front", step: 15, name: "Cable gland", infoId: "cableGland", tightHitArea: true, circle: [1537, 1052, 127] },
+          { id: "psu-earth-cable", step: 16, name: "PSU earth cable", infoId: "psuEarthCable", rects: [[647, 658, 41, 84]] }
           ]
         },
         bracket: {
@@ -1556,7 +1560,7 @@
           name: "SMA connector",
           description: "RF channel SMA connector on the PSU. The BNCB connectors run through a cable and attach to the 3 SMA connectors.",
           appliesTo: null,
-          steps: [{"ref": "7", "text": "Install the dummy socket and the three RF channel cables. Ensure that there is a washer on both sides of the BNCB connector. Tighten the BNCB connector with the torque screwdriver and the SMA connector with the 8mm torque spanner. Be wary of the BNCB connectors twisting the cables when tightened. Make sure that the alignment is correct."}, {"ref": "12", "text": "Place the following labels: a) SMA channel label"}],
+          steps: [{"ref": "1", "text": "Install the dummy socket and the three RF channel cables. Ensure that there is a washer on both sides of the BNCB connector. Tighten the BNCB connector with the torque screwdriver and the SMA connector with the 8mm torque spanner. Be wary of the BNCB connectors twisting the cables when tightened. Make sure that the alignment is correct."}, {"ref": "2", "text": "Place the following labels: a) SMA channel label"}],
           torque: [{"component": "SMA connectors", "tool": "8mm torque spanner", "value": "0.63 – 0.70 Nm"}],
           torqueNote: null,
           reminders: ["When using the 8mm torque spanner. Always tighten in the direction of the thinner jaw."],
@@ -1569,8 +1573,8 @@
           name: "Gold RF terminal cap",
           description: "Cap on the 4th RF terminal. It serves no function other than to close off the RF terminal to reduce noise.",
           appliesTo: null,
-          steps: [],
-          torque: [],
+          steps: [{"ref": "1", "text": "This is added in Hardware Check and not a part of the Assembly Procedure"}],
+          torque: [{"component": "SMA", "value": "0.65 Nm", "tool": ""}],
           torqueNote: "No torque setting for this cap is listed in the SWP.",
           reminders: [],
           postOperation: [],
@@ -1582,7 +1586,7 @@
           name: "BNCB connector",
           description: "BNCB connector on the enclosure. The BNCB connectors run through a cable and attach to the 3 SMA connectors on the PSU.",
           appliesTo: null,
-          steps: [{"ref": "7", "text": "Install the dummy socket and the three RF channel cables. Ensure that there is a washer on both sides of the BNCB connector. Tighten the BNCB connector with the torque screwdriver and the SMA connector with the 8mm torque spanner. Be wary of the BNCB connectors twisting the cables when tightened. Make sure that the alignment is correct."}, {"ref": "12", "text": "Place the following labels: b) BNCB connector label"}],
+          steps: [{"ref": "1", "text": "Install the dummy socket and the three RF channel cables. Ensure that there is a washer on both sides of the BNCB connector. Tighten the BNCB connector with the torque screwdriver and the SMA connector with the 8mm torque spanner. Be wary of the BNCB connectors twisting the cables when tightened. Make sure that the alignment is correct."}, {"ref": "2", "text": "Place the following labels: b) BNCB connector label"}],
           torque: [{"component": "BNCB connectors", "tool": "21mm hex socket torque screwdriver", "value": "1.5 Nm"}],
           torqueNote: null,
           reminders: [],
@@ -1592,23 +1596,23 @@
         },
         knurledNut: {
           source: "GEN4 Assembly Safe Work Procedure v1.0.0 - Production SWP Compilation v1.0 (Revised 2)",
-          name: "Knurled bolt",
-          description: "Knurled bolt on the transient protection earth, fitted along with the earth cables.",
-          appliesTo: null,
-          steps: [{"ref": "10", "text": "Install the knurled bolt on the transient protection earth along with the earth cables. Make sure to use two washers; 1 spring and 1 flat washer, in that order, before tightening it with pliers. Try to move the earth cable to verify if its tight enough."}],
-          torque: [],
-          torqueNote: "No torque setting is listed in the SWP; the bolt is tightened with pliers.",
+          name: "Knurled Nut",
+          description: "Grounds the Data Collection Unit",
+          appliesTo: "Knurled Nut",
+          steps: [{"ref": "1", "text": "Install the knurled bolt on the transient protection earth along with the earth cables."}, {"ref": "2", "text": "Make sure to use two washers; 1 spring and 1 flat washer, in that order, before tightening it with pliers."}, {"ref": "3", "text": "Try to move the earth cable to verify if its tight enough."}],
+          torque: [{"component": "Bolt (Torque Not Specified)", "value": "NA", "tool": "Pliers"}],
+          torqueNote: null,
           reminders: [],
           postOperation: [],
-          checkLabel: "Knurled bolt checked",
+          checkLabel: "Knurled nut checked",
           model: null
         },
         mcb: {
           source: "GEN4 Assembly Safe Work Procedure v1.0.0 - Production SWP Compilation v1.0 (Revised 2)",
           name: "MCB",
-          description: "Schneider iC60N C10A MCB on the PSU. The 2-pin Bulgin connector lands on these terminals.",
+          description: "Schneider iC60N C10A MCB on the PSU. The Bulgin 2-pin power connector lands on these terminals.",
           appliesTo: null,
-          steps: [{"ref": "8.A", "text": "Connect the blue and brown wires to the PSU terminals. The blue wire should be connected to the positive (right) and the brown wire to the negative (left) terminal. Tighten the terminals using a Philipps torque screwdriver."}, {"ref": "8.C", "text": "Afterwards, tighten the PSU's MCB terminals with a Philipps torque screwdriver to prepare them for testing later."}],
+          steps: [{"ref": "8.A", "text": "Connect the blue and brown wires to the PSU terminals. The blue wire should be connected to the positive (right) and the brown wire to the negative (left) terminal. Tighten the terminals using a Philipps torque screwdriver."}, {"ref": "8.C", "text": "Afterwards, tighten the PSU's MCB terminals with a Philipps torque screwdriver to prepare them for testing."}],
           torque: [{"component": "MCB terminals", "tool": "Philips torque screwdriver", "value": "2.0 – 2.5 Nm"}],
           torqueNote: "The SWP torque table lists 2.0 Nm for Bulgin terminals; 2.0 – 2.5 Nm is the range supplied for the MCB.",
           reminders: [],
@@ -1618,15 +1622,15 @@
         },
         cableGland: {
           source: "GEN4 Assembly Safe Work Procedure v1.0.0 - Production SWP Compilation v1.0 (Revised 2)",
-          name: "Small cable gland",
-          description: "Small cable gland installed through the enclosure, above the 2-pin Bulgin connector.",
-          appliesTo: null,
-          steps: [{"ref": "9", "text": "Install the small cable gland on the enclosure. Make sure that there is a washer on both sides of the cable gland. Tighten the locknut using a torque screwdriver equipped with a 36mm hex socket."}],
-          torque: [{"component": "Cable gland locknut", "tool": "36mm hex socket torque screwdriver", "value": "4.0 Nm"}],
-          torqueNote: "The SWP torque table lists a 42/36mm hex socket for cable gland locknuts: 36mm for this small cable gland (step 9), 42mm for the large cable gland on cable gland configurations (step 8.C).",
+          name: "Cable gland",
+          description: "Cable gland installed through the enclosure, with the Bulgin connector below it.",
+          appliesTo: "Applies only to cable gland configurations",
+          steps: [{"ref": "1", "text": "Install the cable gland on the enclosure. Make sure that there is a washer on both sides of the cable gland. Tighten the lock nut using a torque screwdriver equipped with a 42mm hex socket."}],
+          torque: [{"component": "Cable gland locknut", "tool": "42/36mm hex socket torque screwdriver", "value": "4.0 Nm"}],
+          torqueNote: "SWP step 9 covers a small cable gland tightened with a 36mm hex socket.",
           reminders: [],
           postOperation: [],
-          checkLabel: "Small cable gland checked",
+          checkLabel: "Cable gland checked",
           model: null
         },
         earthStud: {
@@ -1634,20 +1638,20 @@
           name: "Earth stud",
           description: "Earth stud on the enclosure door.",
           appliesTo: null,
-          steps: [{"ref": "Pre 6", "text": "Verify that the earth studs and pole bracket studs all have torque marks. If you find any missing torque marks, use a torque screwdriver with a 10mm socket at 2.0 Nm to verify its tightness. Apply the torque mark afterwards."}],
+          steps: [],
           torque: [{"component": "Earth studs", "tool": "10mm socket drive torque screwdriver", "value": "2.0 – 2.5 Nm"}],
           torqueNote: "The SWP torque table lists 2.0 Nm; 2.0 – 2.5 Nm is the range supplied.",
           reminders: [],
-          postOperation: [],
+          postOperation: ["Verify that the earth studs and pole bracket studs all have torque marks. If you find any missing torque marks, use a torque screwdriver with a 10mm socket at 2.0 Nm to verify its tightness. Apply the torque mark afterwards."],
           checkLabel: "Earth stud checked",
           model: null
         },
         rfAntennaSma: {
           source: "GEN4 Assembly Safe Work Procedure v1.0.0 - Production SWP Compilation v1.0 (Revised 2)",
-          name: "RF SMA",
-          description: "SMA connector on the DCU's cellular port, for the cellular antenna cable.",
+          name: "RF antenna SMA connector",
+          description: "SMA connector on the DCU for the RF antenna cable.",
           appliesTo: null,
-          steps: [{"ref": "6", "text": "Connect the cellular antenna and the gps antenna to their respective ports. Use the 8mm torque spanner to tighten the connector just enough for it to bend, indicating that the appropriate torque is applied."}],
+          steps: [{"ref": "1", "text": "Connect the cellular antenna and the gps antenna to their respective ports. Use the 8mm torque spanner to tighten the connector just enough for it to bend, indicating that the appropriate torque is applied."}],
           torque: [{"component": "SMA connectors", "tool": "8mm torque spanner", "value": "0.63 – 0.70 Nm"}],
           torqueNote: null,
           reminders: ["When using the 8mm torque spanner. Always tighten in the direction of the thinner jaw."],
@@ -1657,12 +1661,12 @@
         },
         gpsAntennaConnector: {
           source: "GEN4 Assembly Safe Work Procedure v1.0.0 - Production SWP Compilation v1.0 (Revised 2)",
-          name: "GPS antenna SMA",
+          name: "GPS antenna connector",
           description: "GPS antenna connector on the DCU.",
           appliesTo: null,
-          steps: [{"ref": "3", "text": "Make sure that the cellular antenna cable is not caught underneath the PSU while the GPS antenna cable should pass below the PSU towards the BNCB slots. Be careful not to let the gps antenna get caught between the PSU and the bracket."}, {"ref": "6", "text": "Connect the cellular antenna and the gps antenna to their respective ports. Use the 8mm torque spanner to tighten the connector just enough for it to bend, indicating that the appropriate torque is applied."}],
+          steps: [{"ref": "1", "text": "Make sure that the cellular antenna cable is not caught underneath the PSU while the GPS antenna cable should pass below the PSU towards the BNCB slots. Be careful not to let the gps antenna get caught between the PSU and the bracket."}, {"ref": "2", "text": "Connect the cellular antenna and the gps antenna to their respective ports. Use the 8mm torque spanner to tighten the connector just enough for it to bend, indicating that the appropriate torque is applied."}],
           torque: [{"component": "SMA connectors", "tool": "8mm torque spanner", "value": "0.63 – 0.70 Nm"}],
-          torqueNote: "The 3.0 Nm GPS locknut belongs to the GPS antenna on the enclosure (SWP step 2), not this connector.",
+          torqueNote: "The GPS locknut is a separate fastener: 3.0 Nm with a 14mm hex socket torque screwdriver.",
           reminders: ["When using the 8mm torque spanner. Always tighten in the direction of the thinner jaw."],
           postOperation: [],
           checkLabel: "GPS antenna connector checked",
@@ -1670,10 +1674,10 @@
         },
         mf8Cable: {
           source: "GEN4 Assembly Safe Work Procedure v1.0.0 - Production SWP Compilation v1.0 (Revised 2)",
-          name: "MF8-to-MF8 LF cable",
+          name: "MF8 cable",
           description: "LF cable (MF8-to-MF8) between the PSU and the DCU. Both connectors belong to this one cable; one is fitted the other way up, so the wire colours appear reversed.",
           appliesTo: null,
-          steps: [{"ref": "5", "text": "Mount the DCU on the PSU and connect them using the power cable (MF4-to-MF4) and LF cable (MF8-to-MF8)."}],
+          steps: [{"ref": "1", "text": "Mount the DCU on the PSU and connect them using the power cable (MF4-to-MF4) and LF cable (MF8-to-MF8)."}],
           torque: [],
           torqueNote: null,
           reminders: [],
@@ -1683,7 +1687,7 @@
         },
         psuEarthCable: {
           source: "GEN4 Assembly Safe Work Procedure v1.0.0 - Production SWP Compilation v1.0 (Revised 2)",
-          name: "2-pin earth cable",
+          name: "PSU earth cable",
           description: "2-pin earth cable connected to the PSU.",
           appliesTo: null,
           steps: [{"ref": "4", "text": "Connect the PSU to the 2-pin earth cable."}],
@@ -1696,10 +1700,10 @@
         },
         bulginPower: {
           source: "GEN4 Assembly Safe Work Procedure v1.0.0 - Production SWP Compilation v1.0 (Revised 2)",
-          name: "2-pin Bulgin connector",
+          name: "Bulgin 2-pin power connector",
           description: "2-pin bulgin installed on the enclosure. The blue and brown wires connect to the PSU terminals.",
           appliesTo: "Applies only to 2-pin bulgin configurations",
-          steps: [{"ref": "8.A", "text": "Install the 2-pin bulgin on the enclosure. Make sure that there is a washer on both sides of the connector (one on the outside of the enclosure and one on the inside of the enclosure). Tighten the locknut with a torque screwdriver equipped with a 36mm hex socket."}, {"ref": "8.A", "text": "Connect the blue and brown wires to the PSU terminals. The blue wire should be connected to the positive (right) and the brown wire to the negative (left) terminal. Tighten the terminals using a Philipps torque screwdriver."}, {"ref": "8.A", "text": "Ensure that the 2-pin bulgin connection is secure before placing a safety label on the PSU terminals."}],
+          steps: [{"ref": "1", "text": "Install the 2-pin bulgin on the enclosure. Make sure that there is a washer on both sides of the connector (one on the outside of the enclosure and one on the inside of the enclosure). Tighten the locknut with a torque screwdriver equipped with a 36mm hex socket."}, {"ref": "2", "text": "Connect the blue and brown wires to the PSU terminals. The blue wire should be connected to the positive (right) and the brown wire to the negative (left) terminal. Tighten the terminals using a Philipps torque screwdriver."}, {"ref": "3", "text": "Ensure that the 2-pin bulgin connection is secure before placing a safety label on the PSU terminals."}],
           torque: [{"component": "Bulgin locknut", "tool": "42mm hex socket torque screwdriver", "value": "1.5 Nm"}, {"component": "Bulgin terminals", "tool": "Philips torque screwdriver", "value": "2.0 Nm"}],
           torqueNote: "Check: the SWP torque table lists a 42mm hex socket for the Bulgin locknut, while step 8.A lists a 36mm hex socket.",
           reminders: [],
@@ -1712,11 +1716,11 @@
           name: "Bulgin To MCB",
           description: "Blue and brown wires from the 2-pin bulgin to the PSU's MCB terminals: blue to positive (right), brown to negative (left).",
           appliesTo: "Applies only to 2-pin bulgin configurations",
-          steps: [{"ref": "8.A", "text": "Connect the blue and brown wires to the PSU terminals. The blue wire should be connected to the positive (right) and the brown wire to the negative (left) terminal. Tighten the terminals using a Philipps torque screwdriver."}, {"ref": "8.A", "text": "Ensure that the 2-pin bulgin connection is secure before placing a safety label on the PSU terminals."}],
+          steps: [{"ref": "1", "text": "Connect the blue and brown wires to the PSU terminals. The blue wire should be connected to the positive (right) and the brown wire to the negative (left) terminal. Tighten the terminals using an electric screwdriver with a PH2 drill bit at MAX settings"}, {"ref": "2", "text": "Place a safety label on the PSU terminals."}],
           torque: [{"component": "Bulgin terminals", "tool": "Philips torque screwdriver", "value": "2.0 Nm"}],
           torqueNote: null,
           reminders: [],
-          postOperation: [],
+          postOperation: ["Pull on each individual wire to ensure correct termination"],
           checkLabel: "Bulgin to MCB checked",
           model: null
         },
@@ -1725,7 +1729,7 @@
           name: "Dummy socket",
           description: "Dummy socket in the N/4 position, beside the three RF channel BNCB connectors.",
           appliesTo: null,
-          steps: [{"ref": "7", "text": "Install the dummy socket and the three RF channel cables. Ensure that there is a washer on both sides of the BNCB connector. Tighten the BNCB connector with the torque screwdriver and the SMA connector with the 8mm torque spanner. Be wary of the BNCB connectors twisting the cables when tightened. Make sure that the alignment is correct."}],
+          steps: [{"ref": "1", "text": "Install the dummy socket and the three RF channel cables. Ensure that there is a washer on both sides of the BNCB connector. Tighten the BNCB connector with the torque screwdriver and the SMA connector with the 8mm torque spanner. Be wary of the BNCB connectors twisting the cables when tightened. Make sure that the alignment is correct."}],
           torque: [],
           torqueNote: "No separate torque setting for the dummy socket is listed in the SWP. The BNCB connectors fitted at the same step are 1.5 Nm with a 21mm hex socket torque screwdriver.",
           reminders: [],
@@ -1738,7 +1742,7 @@
           name: "MF4-to-MF4 power cable",
           description: "Power cable (MF4-to-MF4) between the PSU and the DCU.",
           appliesTo: null,
-          steps: [{"ref": "5", "text": "Mount the DCU on the PSU and connect them using the power cable (MF4-to-MF4) and LF cable (MF8-to-MF8)."}],
+          steps: [{"ref": "1", "text": "Mount the DCU on the PSU and connect them using the power cable (MF4-to-MF4) and LF cable (MF8-to-MF8)."}],
           torque: [],
           torqueNote: null,
           reminders: [],
@@ -1751,7 +1755,7 @@
           name: "Cellular antenna cable",
           description: "Cellular antenna cable fitted through the enclosure wall, with its connector tightened on the outside. The other end plugs into the DCU's cellular port (RF SMA).",
           appliesTo: null,
-          steps: [{"ref": "2", "text": "Install the cellular antenna cable and GPS antenna on the enclosure and tighten the connectors using the adjustable wrench and torque screwdriver with a 14mm hex socket drive. Use the alcohol wipe before sticking the GPS antenna."}, {"ref": "3", "text": "Make sure that the cellular antenna cable is not caught underneath the PSU while the GPS antenna cable should pass below the PSU towards the BNCB slots. Be careful not to let the gps antenna get caught between the PSU and the bracket."}],
+          steps: [{"ref": "1", "text": "Install the cellular antenna cable and GPS antenna on the enclosure and tighten the connectors using the adjustable wrench and torque screwdriver with a 14mm hex socket drive. Use the alcohol wipe before sticking the GPS antenna."}, {"ref": "2", "text": "Make sure that the cellular antenna cable is not caught underneath the PSU while the GPS antenna cable should pass below the PSU towards the BNCB slots. Be careful not to let the gps antenna get caught between the PSU and the bracket."}],
           torque: [],
           torqueNote: "The SWP torque table has no separate setting for the cellular antenna connector. Step 2 tightens it with the adjustable wrench and a torque screwdriver with a 14mm hex socket drive.",
           reminders: [],
@@ -1764,7 +1768,7 @@
           name: "GPS antenna",
           description: "GPS antenna on the outside of the enclosure, secured with the GPS locknut.",
           appliesTo: null,
-          steps: [{"ref": "2", "text": "Install the cellular antenna cable and GPS antenna on the enclosure and tighten the connectors using the adjustable wrench and torque screwdriver with a 14mm hex socket drive. Use the alcohol wipe before sticking the GPS antenna."}, {"ref": "3", "text": "Make sure that the cellular antenna cable is not caught underneath the PSU while the GPS antenna cable should pass below the PSU towards the BNCB slots. Be careful not to let the gps antenna get caught between the PSU and the bracket."}],
+          steps: [{"ref": "1", "text": "Install the cellular antenna cable and GPS antenna on the enclosure and tighten the connectors using the adjustable wrench and torque screwdriver with a 14mm hex socket drive. Use the alcohol wipe before sticking the GPS antenna."}, {"ref": "2", "text": "Make sure that the cellular antenna cable is not caught underneath the PSU while the GPS antenna cable should pass below the PSU towards the BNCB slots. Be careful not to let the gps antenna get caught between the PSU and the bracket."}],
           torque: [{"component": "GPS locknut", "tool": "14mm hex socket torque screwdriver", "value": "3.0 Nm"}],
           torqueNote: null,
           reminders: [],
@@ -1777,11 +1781,11 @@
           name: "Q-lug",
           description: "Q-lug bolted to the right leg of the pole bracket, with 3 flat washers and a lock nut.",
           appliesTo: null,
-          steps: [{"ref": "11", "text": "Install the q-lug on the enclosure's pole bracket. Use 3 flat washers; 1 before inserting the bolt, 1 after inserting the bolt and 1 after inserting the q-lug, before the lock nut. Tighten using a torque ratchet with 10mm hex socket on one side and a 10mm spanner on the other side."}],
+          steps: [{"ref": "1", "text": "Install the q-lug on the enclosure's pole bracket. Use 3 flat washers; 1 before inserting the bolt, 1 after inserting the bolt and 1 after inserting the q-lug, before the lock nut. Tighten using a torque ratchet with 10mm hex socket on one side and a 10mm spanner on the other side."}],
           torque: [{"component": "Q-lug", "tool": "Torque ratchet, 10mm hex socket (10mm spanner on the other side)", "value": "5.0 Nm"}],
           torqueNote: null,
           reminders: [],
-          postOperation: ["Perform the post assembly checklist form. Apply torque marks on the SMA connectors, cellular antenna connector (external) and q-lug after verifying their torque settings."],
+          postOperation: ["Apply Torque Marks on the Q-lug"],
           checkLabel: "Q-lug checked",
           model: null
         },
@@ -2196,7 +2200,6 @@
 
       document.querySelector("#sourceNote").textContent = information.source ? `Source: ${information.source}` : "";
       inspectionCheck.textContent = information.checkLabel;
-      document.querySelector("#editTools").hidden = !editMode;
     }
 
     function updateInspectionCheck() {
@@ -2560,6 +2563,9 @@
 
     // ---------- passcode + edit mode wiring ----------
     const editToggle = document.querySelector("#editToggle");
+    const editLock = document.querySelector("#editLock");
+    const editTools = document.querySelector("#editTools");
+    let openToolsAfterUnlock = false; // Edit mode was tapped while locked
     const passcodeDialog = document.querySelector("#passcodeDialog");
     const passcodeInput = document.querySelector("#passcodeInput");
     const passcodeError = document.querySelector("#passcodeError");
@@ -2568,6 +2574,10 @@
       editMode = on;
       editToggle.setAttribute("aria-pressed", String(on));
       editToggle.textContent = on ? "Done editing" : "Edit text";
+      editLock.setAttribute("aria-pressed", String(on));
+      if (!on) {
+        showEditTools(false);
+      }
       detailPanel.classList.toggle("editing", on);
       if (activeHotspotId) {
         renderSharedInformation(WORK_INSTRUCTION.sharedInformation[getHotspot(activeHotspotId).infoId]);
@@ -2585,6 +2595,8 @@
       if (passcodeInput.value.trim() === ADMIN_PASSCODE) {
         passcodeDialog.hidden = true;
         setEditMode(true);
+        showEditTools(openToolsAfterUnlock);
+        openToolsAfterUnlock = false;
         return;
       }
       passcodeError.hidden = false;
@@ -2593,6 +2605,7 @@
     }
 
     editToggle.addEventListener("click", () => {
+      openToolsAfterUnlock = false;
       if (editMode) {
         setEditMode(false);
       } else {
@@ -2602,6 +2615,43 @@
     document.querySelector("#passcodeConfirm").addEventListener("click", checkPasscode);
     document.querySelector("#passcodeCancel").addEventListener("click", () => {
       passcodeDialog.hidden = true;
+      openToolsAfterUnlock = false;
+    });
+
+    // Edit mode opens the edit tools (export / undo) under it; while locked it asks for the passcode first.
+    function placeEditTools() {
+      const button = editLock.getBoundingClientRect();
+      const width = editTools.offsetWidth;
+      editTools.style.top = `${button.bottom + 8}px`;
+      editTools.style.left = `${Math.max(8, Math.min(button.right - width, window.innerWidth - width - 8))}px`;
+    }
+
+    function showEditTools(open) {
+      editTools.hidden = !open;
+      editLock.setAttribute("aria-expanded", String(open));
+      if (open) {
+        placeEditTools();
+      }
+    }
+
+    editLock.addEventListener("click", () => {
+      if (!editMode) {
+        openToolsAfterUnlock = true;
+        askForPasscode();
+        return;
+      }
+      showEditTools(editTools.hidden);
+    });
+    // A tap anywhere else closes the tools.
+    document.addEventListener("pointerdown", (event) => {
+      if (!editTools.hidden && !editTools.contains(event.target) && !editLock.contains(event.target)) {
+        showEditTools(false);
+      }
+    });
+    window.addEventListener("resize", () => {
+      if (!editTools.hidden) {
+        placeEditTools();
+      }
     });
     passcodeInput.addEventListener("keydown", (event) => {
       if (event.key === "Enter") {
@@ -2694,6 +2744,7 @@
 
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape") {
+        showEditTools(false);
         previewHotspot(null);
         clearSelection({ restoreFocus: true });
       }
